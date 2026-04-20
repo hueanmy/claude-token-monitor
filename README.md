@@ -127,15 +127,25 @@ recommendations. The same output is appended to `report --format html` as an
 | `cache-rebuild` | Session `cache_write / cache_read` > 0.2 | Long session with growing history — split with `/clear` |
 | `many-reads` | Session ≥ 30 Read calls, ≥ 40% of tool use, supported language | Use [ast-graph](https://github.com/emtyty/ast-graph) `symbol` / `blast-radius` instead of whole-file Reads |
 | `explore-on-opus` | Session ≥ 70% Opus, ≥ 85% exploration tools (Read/Grep/Glob/…) | Plan/analyze on Sonnet or Haiku; Opus only for synthesis. Pairs well with ast-graph |
+| `plan-mode-opus` | Session used `ExitPlanMode` **and** ≥ 70% Opus | Draft the plan on Sonnet; feed ast-graph `symbol`/`hotspots`/`blast-radius`/`dead-code` into the plan instead of Read/Grep-mapping by hand |
 
-Rules 8 and 9 check the project's `Read` file extensions against ast-graph's
-supported languages (Rust, Python, JS/TS, C#, Java) — the ast-graph
-suggestion only appears when ≥ 50% of the reads land on supported files.
+Rules 8, 9 and 10 check the project's `Read` file extensions against
+ast-graph's supported languages (Rust, Python, JS/TS, C#, Java) — the
+ast-graph suggestion only appears when ≥ 50% of the reads land on
+supported files.
 
-Savings are estimated from Claude pricing: Opus → Sonnet saves ~80% across
-input, output, and cache tiers (the ratio is roughly uniform). ZeroCTX is
-assumed to compress spike stdout by ~60%. These are rules-of-thumb — treat
-the numbers as directional, not accounting.
+Plan mode is detected from the JSONL logs via the `ExitPlanMode` tool
+call — Claude Code emits that tool when the user approves a plan, so its
+presence in a session is a reliable marker that planning happened there.
+
+Savings are estimated from Claude pricing: Opus → Sonnet saves ~80%
+across input, output, and cache tiers (the ratio is roughly uniform).
+ZeroCTX is assumed to compress spike stdout by ~60%. These are
+rules-of-thumb — treat the numbers as directional, not accounting.
+
+The `report --format html` export embeds the Suggestions table plus a
+footer repeating this methodology and linking the external tools, so a
+shared report is self-explanatory.
 
 ## Pricing
 
