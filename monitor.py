@@ -1782,7 +1782,7 @@ def _render_suggestions(console, suggestions: list[Suggestion], top: int) -> Non
     t = Table(box=box.SIMPLE_HEAVY, show_lines=False)
     t.add_column("Sev", no_wrap=True)
     t.add_column("Rule", no_wrap=True)
-    t.add_column("Scope", overflow="ellipsis")
+    t.add_column("Scope", overflow="fold", min_width=22)
     t.add_column("Evidence", overflow="fold")
     t.add_column("Save", justify="right", no_wrap=True)
     t.add_column("Action", overflow="fold")
