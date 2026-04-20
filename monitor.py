@@ -324,6 +324,10 @@ def cmd_summary(args) -> None:
         )
     console.print(t)
 
+    suggestions = analyze_suggestions(records)
+    if suggestions:
+        _render_suggestions(console, suggestions, top=5)
+
 
 def cmd_daily(args) -> None:
     records = load_all()
@@ -360,6 +364,10 @@ def cmd_daily(args) -> None:
     console.print(t)
     console.print(f"[bold]Total for window:[/bold] [green]{fmt_cost(total_cost)}[/green]")
 
+    suggestions = analyze_suggestions(records)
+    if suggestions:
+        _render_suggestions(console, suggestions, top=3)
+
 
 def cmd_projects(args) -> None:
     records = load_all()
@@ -387,6 +395,10 @@ def cmd_projects(args) -> None:
                   fmt_num(a["in"]), fmt_num(a["out"]),
                   fmt_cost(a["cost"]), last)
     console.print(t)
+
+    suggestions = analyze_suggestions(records)
+    if suggestions:
+        _render_suggestions(console, suggestions, top=3)
 
 
 def cmd_sessions(args) -> None:
@@ -1107,7 +1119,8 @@ def cmd_report(args) -> None:
     else:
         print(f"Unknown format: {args.format}", file=sys.stderr)
         sys.exit(1)
-    print(f"Wrote report -> {out}", file=sys.stderr)
+    if out != "-":
+        print(f"Wrote report -> {out}", file=sys.stderr)
     if args.format == "html":
         print("Open in a browser and use File > Print > Save as PDF for a PDF copy.",
               file=sys.stderr)
