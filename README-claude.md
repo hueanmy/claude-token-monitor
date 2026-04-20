@@ -22,6 +22,8 @@ Requires Python 3.10+.
 /usage-summary [subcommand or project]
 ```
 
+![alt text](image.png)
+
 | Invocation | Runs |
 |---|---|
 | `/usage-summary` | Full dashboard (models, daily, projects, heatmap, suggestions) |
