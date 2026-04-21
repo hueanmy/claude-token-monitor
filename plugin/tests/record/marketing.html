@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>claude-token-monitor — marketing</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #e6edf3;
+      position: relative;
+    }
+
+    /* Stage: one layer per scene, stacked absolutely */
+    .stage { position: absolute; inset: 0; }
+    .scene {
+      position: absolute; inset: 0;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5vmin;
+    }
+    .scene.active { opacity: 1; }
+
+    /* ---------- Captions (shared) ---------- */
+    .captions {
+      position: absolute;
+      left: 5vmin;
+      right: 5vmin;
+      bottom: 7vmin;
+      text-align: center;
+      z-index: 10;
+    }
+    .caption-en {
+      font-weight: 800;
+      font-size: min(7vw, 9vh);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 24px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,1);
+      color: #ffffff;
+      margin-bottom: 2vmin;
+    }
+    .caption-vi {
+      font-weight: 500;
+      font-size: min(2vw, 2.6vh);
+      line-height: 1.35;
+      opacity: 0.78;
+      color: #c9d1d9;
+      max-width: 80ch;
+      margin: 0 auto;
+    }
+    @media (orientation: portrait) {
+      .caption-en { font-size: 8vw; }
+      .caption-vi { font-size: 3.2vw; }
+      .captions { bottom: 10vmin; }
+    }
+
+    /* ---------- Scene 1: Hook — money burning ---------- */
+    .scene-1 {
+      background:
+        radial-gradient(circle at 50% 40%, rgba(255,80,40,0.28), transparent 60%),
+        #060307;
+    }
+    .scene-1::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(255,120,60,0.15), transparent 70%);
+      animation: pulse 1.2s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes pulse {
+      from { opacity: 0.5; }
+      to   { opacity: 1; }
+    }
+    .money-counter {
+      font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+      font-size: min(12vw, 18vh);
+      font-weight: 800;
+      color: #ff4d2e;
+      text-shadow:
+        0 0 20px rgba(255,80,40,0.7),
+        0 0 60px rgba(255,80,40,0.35),
+        0 0 120px rgba(255,40,0,0.2);
+      letter-spacing: -0.02em;
+      transform: translateY(-2vh);
+    }
+    .burn-row {
+      display: flex;
+      gap: 1.5vmin;
+      margin-top: 1vh;
+      font-size: min(5vw, 7vh);
+      opacity: 0.9;
+      filter: drop-shadow(0 0 12px rgba(255,100,0,0.5));
+    }
+
+    /* ---------- Scene 2: Opus everywhere ---------- */
+    .scene-2 {
+      background:
+        radial-gradient(circle at 70% 30%, rgba(255,60,40,0.15), transparent 60%),
+        #0d1117;
+      justify-content: flex-start;
+      padding-top: 8vmin;
+    }
+    .fake-cc {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      width: min(88vw, 1400px);
+      padding: 3vmin 3.5vmin;
+      font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+      font-size: min(1.5vw, 2vh);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+    }
+    .fake-cc .header {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 2vmin;
+      border-bottom: 1px solid #30363d;
+      margin-bottom: 2vmin;
+    }
+    .fake-cc .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .fake-cc .dot.r { background: #ff5f56; }
+    .fake-cc .dot.y { background: #ffbd2e; }
+    .fake-cc .dot.g { background: #27c93f; }
+    .fake-cc .model-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.5vmin 2vmin;
+      background: rgba(255, 60, 40, 0.12);
+      border: 1px solid rgba(255, 60, 40, 0.5);
+      border-radius: 8px;
+      margin-bottom: 2vmin;
+      animation: alarm 1.4s ease-in-out infinite;
+    }
+    @keyframes alarm {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,60,40,0.5); }
+      50%      { box-shadow: 0 0 0 12px rgba(255,60,40,0); }
+    }
+    .fake-cc .model-tag {
+      color: #ff8b7a; font-weight: 700;
+      font-size: min(1.8vw, 2.4vh);
+    }
+    .fake-cc .task { padding: 1vmin 0; color: #8b949e; display: flex; justify-content: space-between; }
+    .fake-cc .task .badge {
+      background: rgba(255, 60, 40, 0.2);
+      color: #ffb3a7;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.82em;
+    }
+
+    /* ---------- Scene 3: Edit vs Plan ---------- */
+    .scene-3 {
+      background: linear-gradient(180deg, #0d1117, #05070a);
+    }
+    .vs-wrap {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 3vmin;
+      align-items: stretch;
+      width: min(90vw, 1500px);
+      margin-bottom: 12vh;
+    }
+    @media (orientation: portrait) {
+      .vs-wrap {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto 1fr;
+        width: 92vw;
+      }
+    }
+    .panel {
+      border-radius: 14px;
+      padding: 4vmin 3vmin;
+      display: flex; flex-direction: column; justify-content: center;
+      min-height: 30vh;
+    }
+    .panel .p-label {
+      font-size: min(1.4vw, 2vh);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      opacity: 0.6;
+      margin-bottom: 2vmin;
+    }
+    .panel .p-title {
+      font-size: min(4.2vw, 5.5vh);
+      font-weight: 800;
+      margin-bottom: 2vmin;
+    }
+    .panel .p-cost {
+      font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+      font-size: min(2.2vw, 3vh);
+      opacity: 0.9;
+    }
+    .panel.bad {
+      background: rgba(255, 60, 40, 0.10);
+      border: 2px solid rgba(255, 60, 40, 0.55);
+    }
+    .panel.bad .p-title { color: #ff8b7a; }
+    .panel.bad .p-cost  { color: #ffb3a7; }
+    .panel.good {
+      background: rgba(80, 200, 120, 0.10);
+      border: 2px solid rgba(80, 200, 120, 0.55);
+    }
+    .panel.good .p-title { color: #7ee787; }
+    .panel.good .p-cost  { color: #a9e0b4; }
+    .vs-mid {
+      display: flex; align-items: center; justify-content: center;
+      font-size: min(4vw, 5vh);
+      font-weight: 800;
+      opacity: 0.5;
+    }
+
+    /* ---------- Scene 4: Solution — REAL report ---------- */
+    .scene-4 {
+      background: #0d1117;
+      justify-content: flex-start;
+      padding-top: 4vmin;
+    }
+    .report-wrap {
+      position: relative;
+      width: min(90vw, 1600px);
+      height: 62vh;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+      background: #fff;
+      border: 1px solid #30363d;
+    }
+    @media (orientation: portrait) {
+      .report-wrap { width: 94vw; height: 55vh; }
+    }
+    .real-report {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }
+    /* Floating stat badge — changes per sub-phase of scene 4 */
+    .stat-badge {
+      position: absolute;
+      top: 6vmin;
+      right: 6vmin;
+      background: linear-gradient(135deg, #da3633, #a00c0c);
+      color: #fff;
+      padding: 2vmin 3vmin;
+      border-radius: 14px;
+      box-shadow: 0 12px 40px rgba(218, 54, 51, 0.6);
+      opacity: 0;
+      transform: translateY(-8px) scale(0.95);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      text-align: right;
+      max-width: 32vw;
+      z-index: 5;
+    }
+    .stat-badge.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .stat-badge .n {
+      font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+      font-size: min(3.6vw, 5vh);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .stat-badge .l {
+      display: block;
+      margin-top: 0.8vmin;
+      font-size: min(1.4vw, 1.9vh);
+      font-weight: 500;
+      opacity: 0.92;
+    }
+    .stat-badge.good {
+      background: linear-gradient(135deg, #2ea043, #1a7f37);
+      box-shadow: 0 12px 40px rgba(46, 160, 67, 0.6);
+    }
+    @media (orientation: portrait) {
+      .stat-badge {
+        top: 3vmin; right: 3vmin;
+        padding: 2vmin 2.5vmin;
+        max-width: 44vw;
+      }
+    }
+
+    /* ---------- Scene 5: Benefit — auto routing ---------- */
+    .scene-5 {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(46, 160, 67, 0.15), transparent 60%),
+        #0d1117;
+    }
+    .savings-badge {
+      position: absolute;
+      top: 8vmin;
+      right: 8vmin;
+      background: linear-gradient(135deg, #2ea043, #238636);
+      color: #fff;
+      font-weight: 800;
+      font-size: min(3vw, 4.5vh);
+      padding: 1.5vmin 3vmin;
+      border-radius: 999px;
+      box-shadow: 0 12px 32px rgba(46, 160, 67, 0.5);
+      transform: rotate(-6deg);
+      animation: bob 1.4s ease-in-out infinite alternate;
+    }
+    @media (orientation: portrait) {
+      .savings-badge { top: 5vmin; right: 50%; transform: translateX(50%) rotate(-6deg); }
+    }
+    @keyframes bob {
+      from { transform: rotate(-6deg) translateY(0); }
+      to   { transform: rotate(-6deg) translateY(-8px); }
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 2.5vmin;
+      align-items: center;
+      width: min(88vw, 1400px);
+      margin-bottom: 10vh;
+    }
+    @media (orientation: portrait) {
+      .flow {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        width: 92vw;
+      }
+    }
+    .flow .node {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      padding: 2.5vmin 2vmin;
+      text-align: center;
+    }
+    .flow .node .n-top {
+      font-size: min(1.3vw, 1.8vh);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.6;
+      margin-bottom: 1vmin;
+    }
+    .flow .node .n-title {
+      font-size: min(2.4vw, 3.2vh);
+      font-weight: 700;
+      margin-bottom: 0.5vmin;
+    }
+    .flow .node .n-sub {
+      font-size: min(1.3vw, 1.8vh);
+      opacity: 0.7;
+      font-family: "SF Mono", monospace;
+    }
+    .flow .node.sonnet { border-color: rgba(46, 160, 67, 0.55); background: rgba(46, 160, 67, 0.08); }
+    .flow .node.sonnet .n-title { color: #7ee787; }
+    .flow .node.opus   { border-color: rgba(255, 180, 60, 0.4); }
+    .flow .node.opus .n-title { color: #ffb347; }
+    .arrow {
+      font-size: min(3vw, 4.5vh);
+      color: #8b949e;
+      opacity: 0.7;
+    }
+    @media (orientation: portrait) {
+      .arrow { transform: rotate(90deg); }
+    }
+
+    /* ---------- Scene 6: CTA — restructured as space-evenly stack ---------- */
+    .scene-6 {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(88, 166, 255, 0.15), transparent 60%),
+        #0d1117;
+      justify-content: space-evenly;
+      gap: 2vmin;
+    }
+    /* Scene 6 has its own in-flow captions — override the absolute default */
+    .scene-6 .captions {
+      position: static;
+      left: auto; right: auto; bottom: auto;
+    }
+    .cta-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3vmin;
+      padding: 0 5vmin;
+      width: 100%;
+    }
+    .cta-label {
+      font-size: min(1.6vw, 2.2vh);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      opacity: 0.6;
+      font-weight: 600;
+    }
+    .cta-url {
+      font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+      font-size: min(3.6vw, 5vh);
+      font-weight: 700;
+      color: #58a6ff;
+      padding: 2.4vmin 4vmin;
+      border: 2px solid rgba(88, 166, 255, 0.55);
+      border-radius: 14px;
+      background: rgba(88, 166, 255, 0.08);
+      box-shadow: 0 12px 48px rgba(88, 166, 255, 0.2);
+      letter-spacing: -0.01em;
+      text-align: center;
+      animation: glow 1.4s ease-in-out infinite alternate;
+      word-break: break-all;
+      max-width: 90vw;
+    }
+    @media (orientation: portrait) {
+      .cta-url { font-size: 5vw; padding: 3vmin 3vmin; }
+    }
+    @keyframes glow {
+      from { box-shadow: 0 12px 48px rgba(88, 166, 255, 0.2); }
+      to   { box-shadow: 0 12px 64px rgba(88, 166, 255, 0.55); }
+    }
+    .cta-sub {
+      font-size: min(1.9vw, 2.6vh);
+      opacity: 0.8;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* ---------- Progress bar (small, bottom edge) ---------- */
+    .progress {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      z-index: 100;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #58a6ff, #7ee787);
+      transition: width 0.1s linear;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+
+    <!-- ========== Scene 1 (0 – 6s) : HOOK ========== -->
+    <div class="scene scene-1" data-scene="1">
+      <div class="money-counter">$<span id="counter">0.00</span></div>
+      <div class="burn-row">
+        <span>🔥</span><span>💸</span><span>🔥</span>
+      </div>
+      <div class="captions">
+        <div class="caption-en">Don't burn money on Claude.</div>
+        <div class="caption-vi">Đừng đốt tiền vào Claude nếu bạn chưa biết cách sử dụng nó hiệu quả.</div>
+      </div>
+    </div>
+
+    <!-- ========== Scene 2 (6 – 13s) : Opus everywhere ========== -->
+    <div class="scene scene-2" data-scene="2">
+      <div class="fake-cc">
+        <div class="header">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span style="opacity:0.7;">claude-code — ~/project</span>
+        </div>
+        <div class="model-row">
+          <span>Current model</span>
+          <span class="model-tag">◆ claude-opus-4-7 &nbsp;(default, $$$)</span>
+        </div>
+        <div class="task"><span>› rename variable <i>userInfo</i> → <i>user</i></span><span class="badge">opus</span></div>
+        <div class="task"><span>› fix typo in README.md line 42</span><span class="badge">opus</span></div>
+        <div class="task"><span>› add null-check at UserService.ts:88</span><span class="badge">opus</span></div>
+        <div class="task"><span>› write docstring for getUser()</span><span class="badge">opus</span></div>
+        <div class="task"><span>› format code with prettier</span><span class="badge">opus</span></div>
+      </div>
+      <div class="captions">
+        <div class="caption-en">Running Opus 4.7 on everything?</div>
+        <div class="caption-vi">Có phải cái gì bạn cũng dùng Opus 4.7, hay tệ hơn… lỡ quên switch model và để nó chạy mặc định cả ngày?</div>
+      </div>
+    </div>
+
+    <!-- ========== Scene 3 (13 – 20s) : Edit vs Plan ========== -->
+    <div class="scene scene-3" data-scene="3">
+      <div class="vs-wrap">
+        <div class="panel bad">
+          <div class="p-label">What you use</div>
+          <div class="p-title">Edit mode</div>
+          <div class="p-cost">cost: $$$ · tokens burned · writes code</div>
+        </div>
+        <div class="vs-mid">vs</div>
+        <div class="panel good">
+          <div class="p-label">What you need</div>
+          <div class="p-title">Plan mode</div>
+          <div class="p-cost">cost: $ · just thinking · zero writes</div>
+        </div>
+      </div>
+      <div class="captions">
+        <div class="caption-en">Edit mode when Plan would do.</div>
+        <div class="caption-vi">Bạn lạm dụng Edit mode trong khi thực tế chỉ cần Plan mode là đủ. Đang ném tiền qua cửa sổ mà không hề hay biết.</div>
+      </div>
+    </div>
+
+    <!-- ========== Scene 4 (20 – 28s) : Solution — REAL report ========== -->
+    <div class="scene scene-4" data-scene="4">
+      <div class="report-wrap">
+        <iframe id="real-report" class="real-report"
+                src="/plugin/tests/record/marketing-report.html"
+                title="Real usage report"></iframe>
+        <div class="stat-badge" id="stat-1"><span class="n">$2,439.02</span><span class="l">Total cost · real usage</span></div>
+        <div class="stat-badge" id="stat-2"><span class="n">97%</span><span class="l">spent on Opus</span></div>
+        <div class="stat-badge good" id="stat-3"><span class="n">$2,712</span><span class="l">could have been saved</span></div>
+      </div>
+      <div class="captions">
+        <div class="caption-en">Install the plugin. See where you're leaking.</div>
+        <div class="caption-vi">Cài ngay plugin này để đo lường hiệu suất. Nó phân tích chi tiết usage, nhắc bạn cái nào nên chuyển sang Sonnet để tiết kiệm.</div>
+      </div>
+    </div>
+
+    <!-- ========== Scene 5 (28 – 35s) : Auto routing ========== -->
+    <div class="scene scene-5" data-scene="5">
+      <div class="savings-badge">−50% cost</div>
+      <div class="flow">
+        <div class="node">
+          <div class="n-top">Incoming task</div>
+          <div class="n-title">Any request</div>
+          <div class="n-sub">rename · typo · log · test · design</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="node sonnet">
+          <div class="n-top">If Tier-2 routine</div>
+          <div class="n-title">→ Sonnet 4.6</div>
+          <div class="n-sub">~5× cheaper · auto-routed</div>
+        </div>
+      </div>
+      <div class="captions">
+        <div class="caption-en">Auto-route routine tasks to Sonnet. ~50% cheaper.</div>
+        <div class="caption-vi">Plugin hỗ trợ Routine Worker — mọi request đơn giản tự động điều hướng sang Sonnet thay vì ngốn sạch quota vào Opus.</div>
+      </div>
+    </div>
+
+    <!-- ========== Scene 6 (35 – 40s) : CTA ========== -->
+    <div class="scene scene-6" data-scene="6">
+      <div class="cta-content">
+        <div class="cta-label">★ Get the plugin ★</div>
+        <div class="cta-url">github.com/emtyty/claude-token-monitor</div>
+        <div class="cta-sub">Free · open-source · works with Claude Code</div>
+      </div>
+      <div class="captions">
+        <div class="caption-en">Stop wasting. Optimize today.</div>
+        <div class="caption-vi">Ngừng lãng phí, tối ưu ngay cách dùng AI của bạn từ hôm nay!</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="progress"><div class="progress-fill" id="progress"></div></div>
+
+  <script>
+    // -------- Scene timeline (seconds) --------
+    const TOTAL = 31;
+    const scenes = [
+      { id: 1, start: 0,  end: 2  },
+      { id: 2, start: 2,  end: 4  },
+      { id: 3, start: 4,  end: 11 },
+      { id: 4, start: 11, end: 19 },
+      { id: 5, start: 19, end: 26 },
+      { id: 6, start: 26, end: 31 },
+    ];
+    const sceneEls = Object.fromEntries(
+      Array.from(document.querySelectorAll('.scene'))
+        .map(el => [Number(el.dataset.scene), el])
+    );
+
+    const counterEl  = document.getElementById('counter');
+    const progressEl = document.getElementById('progress');
+    const reportFrame = document.getElementById('real-report');
+    const statBadges  = {
+      1: document.getElementById('stat-1'),
+      2: document.getElementById('stat-2'),
+      3: document.getElementById('stat-3'),
+    };
+
+    function easeOutExpo(x) { return x === 1 ? 1 : 1 - Math.pow(2, -10 * x); }
+    function easeInOut(x)   { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+    function updateCounter(tInScene, sceneDuration) {
+      const p = Math.min(1, tInScene / sceneDuration);
+      const value = easeOutExpo(p) * 487.92;
+      counterEl.textContent = value.toFixed(2);
+    }
+
+    // Scene 4 (20 – 28s): drive iframe scroll + swap stat badges.
+    //  0.0 – 2.5s  top (overview, by-model)                  → badge 1 "$2,439"
+    //  2.5 – 5.0s  daily / heatmap                            → badge 2 "97% Opus"
+    //  5.0 – 8.0s  Efficiency Suggestions (hot)               → badge 3 "$2,712 saved"
+    function updateScene4(tInScene) {
+      const doc = reportFrame.contentDocument;
+      if (doc) {
+        const el = doc.scrollingElement || doc.documentElement;
+        const max = Math.max(0, el.scrollHeight - el.clientHeight);
+        let fraction;
+        if (tInScene < 2.5)      fraction = 0.00 + easeInOut(tInScene / 2.5) * 0.10;
+        else if (tInScene < 5.0) fraction = 0.10 + easeInOut((tInScene - 2.5) / 2.5) * 0.40;
+        else                      fraction = 0.50 + easeInOut(Math.min(1, (tInScene - 5.0) / 3.0)) * 0.45;
+        el.scrollTop = max * fraction;
+      }
+      const activeId = tInScene < 2.5 ? 1 : tInScene < 5.0 ? 2 : 3;
+      for (const [id, el] of Object.entries(statBadges)) {
+        el.classList.toggle('active', Number(id) === activeId);
+      }
+    }
+
+    function setActiveScene(id) {
+      // Explicit boolean — `classList.toggle(name, undefined)` falls back to the
+      // single-arg TOGGLE form (flips state), which caused ghost captions from
+      // earlier scenes to re-appear on the final frame.
+      for (const s of scenes) {
+        sceneEls[s.id].classList.toggle('active', s.id === id);
+      }
+    }
+
+    function start() {
+      const t0 = performance.now();
+      function tick(now) {
+        const t = (now - t0) / 1000;
+        progressEl.style.width = Math.min(100, (t / TOTAL) * 100) + '%';
+
+        const current = scenes.find(s => t >= s.start && t < s.end);
+        setActiveScene(current ? current.id : null);
+
+        if (current && current.id === 1) {
+          updateCounter(t - current.start, current.end - current.start);
+        }
+        if (current && current.id === 4) {
+          updateScene4(t - current.start);
+        }
+        if (!current || current.id !== 4) {
+          Object.values(statBadges).forEach(el => el.classList.remove('active'));
+        }
+
+        if (t < TOTAL) {
+          requestAnimationFrame(tick);
+        } else {
+          // Hold on the CTA: force scene 6 active and clear any stray state.
+          setActiveScene(6);
+          Object.values(statBadges).forEach(el => el.classList.remove('active'));
+          window.__marketingDone = true;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // Wait for iframe to load so scene 4 has something to scroll.
+    function whenReady(cb) {
+      let pending = 1;
+      const done = () => { if (--pending === 0) cb(); };
+      if (reportFrame) {
+        if (reportFrame.contentDocument && reportFrame.contentDocument.readyState === 'complete') {
+          // already loaded
+        } else {
+          pending++;
+          reportFrame.addEventListener('load', done, { once: true });
+        }
+      }
+      done();
+    }
+
+    window.addEventListener('load', () => {
+      whenReady(() => setTimeout(start, 250));
+    });
+  </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 node_modules/
 videos/
+videos-marketing/
 test-results/
 playwright-report/
 *.cast.bak
@@ -11,3 +12,4 @@ report.html
 !package.json
 !package-lock.json
 !demo.html
+!marketing.html

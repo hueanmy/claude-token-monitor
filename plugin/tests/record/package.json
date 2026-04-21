@@ -7,7 +7,11 @@
     "record": "playwright test",
     "record:desktop": "playwright test --project=desktop-16x9",
     "record:mobile": "playwright test --project=mobile-9x16",
-    "convert": "bash convert.sh"
+    "record:marketing": "playwright test --config=playwright-marketing.config.ts",
+    "record:marketing:desktop": "playwright test --config=playwright-marketing.config.ts --project=marketing-desktop-16x9",
+    "record:marketing:mobile": "playwright test --config=playwright-marketing.config.ts --project=marketing-mobile-9x16",
+    "convert": "bash convert.sh",
+    "convert:marketing": "bash convert-marketing.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0"
